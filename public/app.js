@@ -1,12 +1,12 @@
-const KEY = "dalva_ai_cloudflare_v07";
-const LEGACY_KEYS = ["evolve_ai_cloudflare_v04","evolve_ai_cloudflare_v06","evolve_ai_cloudflare_v05"];
+const KEY = "dalva_ai_cloudflare_v08";
+const LEGACY_KEYS = ["dalva_ai_cloudflare_v07","evolve_ai_cloudflare_v04","evolve_ai_cloudflare_v06","evolve_ai_cloudflare_v05"];
 const $ = (id) => document.getElementById(id);
 const views = ["chat","memory","evolution","settings"];
 let generating = false;
 let evolving = false;
 
 const defaultState = () => ({
-  version: 7,
+  version: 8,
   activeConversationId: null,
   conversations: [],
   memories: [],
@@ -23,8 +23,8 @@ const defaultState = () => ({
 
 function loadState(){
   try{
-    const own=localStorage.getItem(KEY);if(own){const raw=JSON.parse(own);return {...defaultState(),...raw,version:7,settings:{...defaultState().settings,...(raw.settings||{})}};}
-    for(const k of LEGACY_KEYS){const old=localStorage.getItem(k);if(old){const raw=JSON.parse(old);const migrated={...defaultState(),...raw,version:7,settings:{...defaultState().settings,...(raw.settings||{})}};localStorage.setItem(KEY,JSON.stringify(migrated));return migrated;}}
+    const own=localStorage.getItem(KEY);if(own){const raw=JSON.parse(own);return {...defaultState(),...raw,version:8,settings:{...defaultState().settings,...(raw.settings||{})}};}
+    for(const k of LEGACY_KEYS){const old=localStorage.getItem(k);if(old){const raw=JSON.parse(old);const migrated={...defaultState(),...raw,version:8,settings:{...defaultState().settings,...(raw.settings||{})}};localStorage.setItem(KEY,JSON.stringify(migrated));return migrated;}}
   }catch{}
   return defaultState();
 }
@@ -39,7 +39,7 @@ function createConversation(render=true){const c={id:crypto.randomUUID(),title:"
 function setTitleFromMessage(c,text){if(c.title==="Nova conversa")c.title=text.replace(/\s+/g," ").slice(0,44)+(text.length>44?"…":"");}
 function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
 function safeUrl(u=""){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:"#";}catch{return"#";}}
-function richText(text=""){
+function richText(text="",sources=[]){
   let x=esc(text);
   x=x.replace(/```([\s\S]*?)```/g,"<pre><code>$1</code></pre>");
   x=x.replace(/`([^`]+)`/g,"<code>$1</code>");
@@ -47,7 +47,10 @@ function richText(text=""){
   x=x.replace(/^### (.+)$/gm,"<h3>$1</h3>").replace(/^## (.+)$/gm,"<h2>$1</h2>");
   x=x.replace(/^[-•] (.+)$/gm,"<li>$1</li>");
   x=x.replace(/(?:<li>[\s\S]*?<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
-  return x.split(/\n{2,}/).map(p=>/^<(pre|ul|h2|h3)/.test(p)?p:`<p>${p.replace(/\n/g,"<br>")}</p>`).join("");
+  x=x.split(/\n{2,}/).map(p=>/^<(pre|ul|h2|h3)/.test(p)?p:`<p>${p.replace(/\n/g,"<br>")}</p>`).join("");
+  // Mantém citações discretas no próprio texto, sem os cartões grandes de fontes.
+  x=x.replace(/\[(\d{1,2})\]/g,(all,n)=>{const src=sources[Number(n)-1];if(!src?.url)return all;const url=esc(safeUrl(src.url));const title=esc(src.title||src.domain||"Abrir fonte");return `<a class="inline-cite" href="${url}" target="_blank" rel="noopener noreferrer" title="${title}">[${n}]</a>`;});
+  return x;
 }
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
 function applyTheme(){document.documentElement.dataset.theme=state.settings.theme==="dark"?"dark":"light";}
@@ -63,10 +66,10 @@ function renderChat(){
   const c=activeConversation(),box=$("messages");
   $("emptyState").classList.toggle("hidden",!!c.messages.length);
   box.innerHTML=c.messages.map((m,i)=>{
-    const src=(m.sources||[]).length?`<div class="sources">${m.sources.slice(0,10).map((s,n)=>`<a class="source-card" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer"><b>[${n+1}] ${esc(s.title||s.url)}</b><span>${esc(s.domain||s.provider||"")}${s.provider?` · ${esc(s.provider)}`:""}${s.publishedAt?` · ${esc(String(s.publishedAt).slice(0,24))}`:""}</span></a>`).join("")}</div>`:"";
+    const src=""; // v0.8: fontes ficam apenas como citações discretas dentro do texto.
     const research=m.role==="assistant"&&m.research?`<div class="research-meta"><span>◎ ${m.research.sources||0} fontes</span><span>${m.research.domains||0} domínios</span><span>${m.research.depth==="profunda"?"Pesquisa profunda":"Pesquisa web"}</span>${m.research.quality?`<span>evidência ${esc(m.research.quality)}</span>`:""}${m.research.verified?"<span>✓ revisada</span>":""}</div>`:"";
     const feedback=m.role==="assistant"?`<div class="message-meta"><button class="mini-btn ${m.feedback===1?"selected":""}" data-feedback="1" data-index="${i}">👍</button><button class="mini-btn ${m.feedback===-1?"selected":""}" data-feedback="-1" data-index="${i}">👎</button><button class="mini-btn" data-copy="${i}">Copiar</button></div>`:"";
-    return `<article class="message"><div class="avatar ${m.role==="assistant"?"ai":""}">${m.role==="assistant"?"D":"V"}</div><div class="message-content">${richText(m.content)}${research}${src}${feedback}</div></article>`;
+    return `<article class="message"><div class="avatar ${m.role==="assistant"?"ai":""}">${m.role==="assistant"?"D":"V"}</div><div class="message-content">${richText(m.content,m.sources||[])}${research}${src}${feedback}</div></article>`;
   }).join("");
   box.querySelectorAll("[data-feedback]").forEach(b=>b.onclick=()=>feedback(+b.dataset.index,+b.dataset.feedback));
   box.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{await navigator.clipboard.writeText(c.messages[+b.dataset.copy].content);toast("Resposta copiada");});
@@ -132,7 +135,7 @@ $("evolveBtn").onclick=()=>evolve(true);
 $("themeBtn").onclick=()=>{state.settings.theme=state.settings.theme==="dark"?"light":"dark";applyTheme();save();};
 $("exportStateBtn").onclick=exportState;
 $("importStateBtn").onclick=()=>$("importStateFile").click();
-$("importStateFile").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());state={...defaultState(),...j,version:7,settings:{...defaultState().settings,...(j.settings||{})}};save();renderChat();syncSettings();toast("Estado importado");}catch{toast("Arquivo inválido");}};
+$("importStateFile").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());state={...defaultState(),...j,version:8,settings:{...defaultState().settings,...(j.settings||{})}};save();renderChat();syncSettings();toast("Estado importado");}catch{toast("Arquivo inválido");}};
 $("resetBtn").onclick=()=>{if(confirm("Apagar conversas, memória e evolução deste navegador?")){localStorage.removeItem(KEY);location.reload();}};
 $("openSidebar").onclick=()=>$("sidebar").classList.add("open");
 $("closeSidebar").onclick=closeSidebar;

@@ -1,4 +1,4 @@
-# Dalva.ai v0.7 — pesquisa multi-fonte e resposta inteligente
+# Dalva.ai v0.8 — pesquisa multi-fonte e resposta inteligente
 
 Esta versão mantém a arquitetura sem API comercial obrigatória: Cloudflare Workers + Workers AI, dentro da franquia gratuita disponível na conta.
 
@@ -47,4 +47,11 @@ Depois do deploy, abra o site e use `Ctrl + F5` para limpar o cache da interface
 
 ## Observação importante
 
-A v0.7 melhora bastante o processo de pesquisa e síntese, mas uma aplicação gratuita baseada em modelos open-weight e mecanismos públicos de busca não terá garantia de paridade absoluta com GPT/Claude hospedados em infraestrutura proprietária. O projeto está estruturado para trocar os componentes de busca/modelo gradualmente quando houver receita, sem reescrever a interface nem a memória.
+A v0.8 melhora bastante o processo de pesquisa e síntese, mas uma aplicação gratuita baseada em modelos open-weight e mecanismos públicos de busca não terá garantia de paridade absoluta com GPT/Claude hospedados em infraestrutura proprietária. O projeto está estruturado para trocar os componentes de busca/modelo gradualmente quando houver receita, sem reescrever a interface nem a memória.
+
+
+## Ajustes v0.8
+- Composer preso ao rodapé do chat com Grid, sem escapar das margens.
+- Campo permanece disponível após qualquer resposta.
+- Removidos os cartões grandes de fontes; citações [n] ficam discretas e clicáveis dentro do texto quando houver URL.
+- Cache-busting em CSS/JS para evitar carregar a interface antiga após o deploy.

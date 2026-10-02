@@ -10,3 +10,31 @@
 #chatView .composer-wrap{position:relative;left:auto;bottom:auto;transform:none;width:min(820px,calc(100% - 34px));margin:0 auto;flex:0 0 auto;padding:10px 0 14px;background:linear-gradient(transparent,var(--bg) 18%);z-index:20}
 .message-content h2{font-size:18px;margin:18px 0 8px}.message-content h3{font-size:15px;margin:16px 0 7px}.message-content ul{margin:8px 0 14px;padding-left:20px}.message-content li{margin:5px 0}
 @media(max-width:760px){#chatView .messages{padding:78px 14px 20px}#chatView .composer-wrap{width:calc(100% - 18px);padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+
+
+/* v0.8 — composer estável e fontes discretas */
+.main{height:100vh;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{position:relative;top:auto;left:auto;right:auto;flex:0 0 58px;height:58px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20}
+.view{height:auto;min-height:0;flex:1}
+#chatView{position:relative;overflow:hidden;min-height:0}
+#chatView.active{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;overflow:hidden}
+#chatView .messages{grid-row:1;height:auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:26px max(24px,calc((100% - 820px)/2)) 28px;scrollbar-gutter:stable}
+#chatView .composer-wrap{grid-row:2;position:relative;inset:auto;left:auto;right:auto;bottom:auto;transform:none;width:min(820px,calc(100% - 48px));max-width:calc(100% - 48px);margin:0 auto;padding:10px 0 max(14px,env(safe-area-inset-bottom));background:var(--bg);z-index:30;align-self:end}
+#chatView .composer-wrap::before{content:"";position:absolute;left:-18px;right:-18px;top:-22px;height:24px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
+.composer{width:100%;min-width:0}
+.composer textarea{min-width:0;max-width:100%;overflow-y:auto}
+.empty-state{top:0;bottom:96px;inset-inline:0;padding:20px;text-align:center;pointer-events:none}
+.empty-state .suggestions,.empty-state button{pointer-events:auto}
+.research-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:10.5px}
+.research-meta span{white-space:nowrap}
+.sources,.source-card{display:none!important}
+.inline-cite{color:inherit;text-decoration:none;border-bottom:1px solid var(--muted);font-size:.82em;vertical-align:.12em;opacity:.78}
+.inline-cite:hover{opacity:1;border-bottom-color:var(--text)}
+@media(max-width:760px){
+  .main{height:100dvh}
+  .topbar{flex-basis:54px;height:54px}
+  #chatView .messages{padding:18px 14px 18px}
+  #chatView .composer-wrap{width:calc(100% - 20px);max-width:calc(100% - 20px);padding:8px 0 max(10px,env(safe-area-inset-bottom))}
+  #chatView .composer-wrap::before{left:-10px;right:-10px}
+  .empty-state{bottom:90px;padding:16px}
+}

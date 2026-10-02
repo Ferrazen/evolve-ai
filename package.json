@@ -1,6 +1,6 @@
 {
   "name": "evolve-ai",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,5 +8,6 @@
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
-  }
+  },
+  "type": "module"
 }

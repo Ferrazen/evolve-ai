@@ -1,24 +1,50 @@
-# Evolve AI v0.6 — Pesquisa Inteligente Multi-Fonte
+# Dalva.ai v0.7 — pesquisa multi-fonte e resposta inteligente
 
-A v0.6 muda a arquitetura de resposta da Evolve. Em vez de pesquisar uma única consulta e entregar os primeiros resultados ao modelo, ela usa um pipeline de apuração e síntese.
+Esta versão mantém a arquitetura sem API comercial obrigatória: Cloudflare Workers + Workers AI, dentro da franquia gratuita disponível na conta.
 
 ## O que mudou
 
-1. **Planejamento da pesquisa** — um modelo rápido transforma a pergunta em até 3 consultas complementares.
-2. **Pesquisa paralela** — Bing RSS, SearXNG, Google News, GDELT, DuckDuckGo, Wikipedia e Crossref são consultados conforme o tipo de pergunta.
-3. **Ranking de fontes** — resultados recebem pontuação por relevância, autoridade, atualidade e diversidade de domínio.
-4. **Leitura das páginas** — a Evolve abre e extrai conteúdo das fontes mais relevantes antes de responder.
-5. **Roteamento de modelos** — perguntas simples usam GLM 4.7 Flash; perguntas factuais normais podem usar Gemma 4; perguntas atuais, complexas ou analíticas são encaminhadas ao GPT-OSS 120B.
-6. **Verificação final** — respostas de pesquisa profunda passam por uma segunda revisão factual, que verifica citações e remove afirmações sem suporte.
-7. **Transparência** — a interface informa quantas fontes e domínios foram consultados e se a resposta passou pela verificação final.
-8. **Autoevolução** — feedbacks continuam podendo gerar novos princípios, agora incluindo regras de pesquisa, clareza e qualidade de raciocínio.
-
-## Custo
-
-A aplicação continua usando Cloudflare Workers AI e respeita a franquia gratuita da conta. Modelos mais fortes consomem mais da franquia diária; por isso a v0.6 faz roteamento automático e não usa o modelo mais pesado para perguntas triviais.
+- Identidade alterada para **Dalva.ai** em toda a interface.
+- Correção estrutural do chat: o campo de pergunta agora fica em uma área flexível fixa no rodapé do chat e não deve desaparecer após respostas longas.
+- Migração automática das conversas/memórias da versão Evolve armazenadas no navegador.
+- Novo roteamento de modelos:
+  - GLM 4.7 Flash para tarefas rápidas, planejamento e revisão;
+  - Qwen 3.8 27B para respostas factuais/atuais;
+  - GPT-OSS 120B para análises e pesquisas mais complexas.
+- Pesquisa em múltiplas consultas e múltiplos provedores.
+- DuckDuckGo HTML + Bing RSS + SearXNG + Google News + GDELT + Wikipedia.
+- Crossref + OpenAlex para pesquisa científica.
+- Adaptadores de dados atuais para câmbio e criptomoedas quando a pergunta pede cotação/preço atual.
+- Reranking semântico com `@cf/baai/bge-reranker-base`.
+- Leitura das páginas mais relevantes, com extração de trechos relacionados à pergunta.
+- Jina Reader como fallback de leitura para páginas difíceis em pesquisas profundas, sem chave obrigatória.
+- Verificação factual final para perguntas atuais/complexas.
+- Indicador de quantidade de fontes, domínios, profundidade, qualidade da evidência e revisão.
 
 ## Deploy
 
-Substitua no repositório GitHub os diretórios/arquivos `public`, `src`, `wrangler.jsonc`, `package.json` e `README.md`. O Cloudflare conectado ao repositório fará um novo deploy automaticamente.
+O projeto continua compatível com o Worker existente `evolve-ai`, evitando mudar a URL atual.
 
-Não é necessária chave da OpenAI, Anthropic ou de outro provedor pago.
+Suba para a raiz do repositório:
+
+- `public/`
+- `src/`
+- `package.json`
+- `wrangler.jsonc`
+- `README.md`
+
+O Cloudflare deverá disparar o deploy automaticamente após o commit.
+
+Depois do deploy, abra o site e use `Ctrl + F5` para limpar o cache da interface.
+
+## Testes sugeridos
+
+1. `Qual o valor do dólar atual em reais e como ele variou hoje?`
+2. `Quais são as principais notícias de inteligência artificial hoje? Cruze várias fontes e me diga o que realmente importa.`
+3. `Compare as versões mais recentes do ChatGPT e Claude em recursos, usando documentação e fontes recentes.`
+4. `Explique as causas de uma alta recente do dólar, separando fatos, contexto e inferências.`
+5. Envie uma resposta longa e confirme que o campo **Pergunte qualquer coisa** continua visível no rodapé.
+
+## Observação importante
+
+A v0.7 melhora bastante o processo de pesquisa e síntese, mas uma aplicação gratuita baseada em modelos open-weight e mecanismos públicos de busca não terá garantia de paridade absoluta com GPT/Claude hospedados em infraestrutura proprietária. O projeto está estruturado para trocar os componentes de busca/modelo gradualmente quando houver receita, sem reescrever a interface nem a memória.

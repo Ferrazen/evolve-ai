@@ -1,48 +1,25 @@
-# Evolve AI v0.3 — gratuita, online e browser-first
+# Evolve AI v0.4 — Cloudflare-first
 
-Esta versão foi desenhada para **não cobrar por token ou mensagem**.
+Esta versão remove WebLLM/WebGPU do navegador. O modelo roda no Cloudflare Workers AI usando o binding `AI`, e o site continua hospedado no mesmo Worker.
 
-## Arquitetura
+## Estrutura
 
-- **Interface:** HTML/CSS/JavaScript estático.
-- **Modelo de IA:** WebLLM, executado no navegador via WebGPU.
-- **Busca:** Cloudflare Pages Function gratuita, com SearXNG e fallbacks públicos (Wikipedia, DuckDuckGo Instant Answer e GDELT).
-- **Memória:** localStorage no navegador.
-- **Autoevolução:** o próprio modelo analisa interações, feedback e princípios existentes e pode acrescentar um novo princípio e/ou memória.
-- **Hospedagem indicada:** Cloudflare Pages Free.
+- `public/`: interface web
+- `src/index.js`: API `/api/chat`, `/api/evolve`, `/api/health` e pesquisa web
+- `wrangler.jsonc`: Static Assets + Workers AI binding
+- `package.json`: Wrangler
 
-## O que significa "online sem custo"
+## Deploy via GitHub + Cloudflare Workers Builds
 
-O site fica online e pode ser acessado de qualquer lugar. O processamento pesado do modelo ocorre no dispositivo de quem abre o site. Isso evita uma conta de GPU no servidor e cobrança por tokens.
+1. Substitua o conteúdo do repositório pelos arquivos desta versão.
+2. No Cloudflare: Settings > Builds.
+3. Build command: deixe vazio.
+4. Deploy command: `npx wrangler deploy`.
+5. Root directory: vazio/raiz.
+6. Faça novo commit na branch `main` ou use Retry deployment.
 
-Na primeira utilização, o navegador baixa o modelo selecionado. O download pode ter centenas de MB ou alguns GB e fica em cache. É necessário navegador com WebGPU, preferencialmente Chrome ou Edge recente.
+O `wrangler.jsonc` cria o binding `AI` para `env.AI` no Worker.
 
-## Pesquisa na internet
+## Custo
 
-A função `/api/search` tenta uma metabusca SearXNG. Como instâncias públicas podem limitar JSON ou ficar indisponíveis, existem fallbacks. Se nenhuma busca funcionar, a interface ainda permite que o modelo responda, mas ele deve informar que não obteve fontes web naquela execução.
-
-## Deploy recomendado (Cloudflare Pages + GitHub)
-
-1. Crie um repositório no GitHub e envie todo o conteúdo desta pasta, mantendo a pasta `functions`.
-2. Na Cloudflare, abra **Workers & Pages > Create > Pages > Connect to Git**.
-3. Selecione o repositório.
-4. Framework preset: **None**.
-5. Build command: deixe vazio.
-6. Build output directory: `public`.
-7. Faça o deploy.
-8. Abra a URL `*.pages.dev` gerada.
-
-A pasta `functions/api/search.js` vira automaticamente o endpoint `/api/search` no Cloudflare Pages.
-
-## Limitações reais da v0.3
-
-- A qualidade não é equivalente a Claude/GPT de grande porte: modelos que cabem no navegador são menores.
-- A velocidade depende da GPU/memória do computador ou dispositivo do visitante.
-- WebGPU não funciona em todo navegador/dispositivo.
-- A memória ainda é por navegador/dispositivo, não centralizada entre usuários.
-- A pesquisa gratuita depende de serviços públicos que podem ficar temporariamente indisponíveis.
-- "Autoevolução" altera memória e princípios, não os pesos neurais do modelo nem o código executável.
-
-## Próximas etapas quando houver receita
-
-A arquitetura foi preparada para trocar gradualmente componentes: banco de dados centralizado, autenticação, modelo maior em servidor, busca dedicada, embeddings/RAG, agentes e sandbox de desenvolvimento com testes/rollback.
+A aplicação usa o plano gratuito do Cloudflare Workers AI enquanto houver cota gratuita disponível. No plano Workers Free, quando a cota gratuita diária é excedida, novas inferências falham em vez de gerar cobrança automática; para exceder a cota é necessário aderir ao plano pago.

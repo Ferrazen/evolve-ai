@@ -1,25 +1,32 @@
-# Evolve AI v0.4 — Cloudflare-first
+# Evolve AI v0.5 — pesquisa web mais rápida e abrangente
 
-Esta versão remove WebLLM/WebGPU do navegador. O modelo roda no Cloudflare Workers AI usando o binding `AI`, e o site continua hospedado no mesmo Worker.
+Esta versão corrige os dois problemas observados na v0.4: respostas factuais que diziam não ter informação e demora excessiva antes da resposta.
 
-## Estrutura
+## O que mudou
 
-- `public/`: interface web
-- `src/index.js`: API `/api/chat`, `/api/evolve`, `/api/health` e pesquisa web
-- `wrangler.jsonc`: Static Assets + Workers AI binding
-- `package.json`: Wrangler
+- Pesquisa web automática em toda pergunta.
+- Provedores executados em paralelo, em vez de esperar um por um.
+- Bing RSS sem chave como fonte adicional de resultados gerais.
+- SearXNG, Wikipedia, DuckDuckGo e GDELT como fontes complementares/fallback.
+- Duas variações da consulta para melhorar perguntas factuais curtas.
+- Cache de pesquisas recentes no Worker.
+- Leitura rápida de páginas somente quando os snippets são insuficientes ou a pergunta é muito atual.
+- O modelo deve responder por melhor esforço mesmo quando a busca não consegue confirmar tudo, sem inventar fontes.
+- Fallback para Llama Fast se o modelo principal falhar.
+- Conversas existentes são preservadas porque a chave de armazenamento do navegador não mudou.
 
-## Deploy via GitHub + Cloudflare Workers Builds
+## Atualização
 
-1. Substitua o conteúdo do repositório pelos arquivos desta versão.
-2. No Cloudflare: Settings > Builds.
-3. Build command: deixe vazio.
-4. Deploy command: `npx wrangler deploy`.
-5. Root directory: vazio/raiz.
-6. Faça novo commit na branch `main` ou use Retry deployment.
+Envie/substitua no repositório GitHub:
 
-O `wrangler.jsonc` cria o binding `AI` para `env.AI` no Worker.
+- `public/`
+- `src/`
+- `package.json`
+- `wrangler.jsonc`
+- `README.md`
 
-## Custo
+O Cloudflare deve fazer o deploy automaticamente depois do commit.
 
-A aplicação usa o plano gratuito do Cloudflare Workers AI enquanto houver cota gratuita disponível. No plano Workers Free, quando a cota gratuita diária é excedida, novas inferências falham em vez de gerar cobrança automática; para exceder a cota é necessário aderir ao plano pago.
+## Observação sobre custo zero
+
+A aplicação continua sem API paga externa. Ela usa a franquia gratuita do Cloudflare Workers AI enquanto houver cota disponível. Quando o projeto for monetizado, uma API oficial de busca comercial ou uma infraestrutura própria de pesquisa será a evolução recomendada para aumentar confiabilidade e escala.

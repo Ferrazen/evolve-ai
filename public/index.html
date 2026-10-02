@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f7f5" />
+  <title>Evolve AI</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<div id="app" class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <button class="brand" id="brandBtn" title="Evolve AI">
+        <span class="brand-mark">E</span><span>Evolve</span>
+      </button>
+      <button class="icon-btn mobile-only" id="closeSidebar" aria-label="Fechar menu">×</button>
+    </div>
+
+    <button id="newChatBtn" class="new-chat"><span>＋</span> Nova conversa</button>
+
+    <div class="nav-section">
+      <button class="nav-item active" data-view="chat"><span>◌</span> Conversas</button>
+      <button class="nav-item" data-view="memory"><span>◇</span> Memória</button>
+      <button class="nav-item" data-view="evolution"><span>↗</span> Evolução</button>
+      <button class="nav-item" data-view="settings"><span>⚙</span> Configurações</button>
+    </div>
+
+    <div class="history-label">Recentes</div>
+    <div id="conversationList" class="conversation-list"></div>
+
+    <div class="sidebar-bottom">
+      <div class="status-row">
+        <span id="modelDot" class="status-dot"></span>
+        <div><b id="modelStatus">Modelo não carregado</b><small id="modelSub">WebGPU + WebLLM</small></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn desktop-hidden" id="openSidebar" aria-label="Abrir menu">☰</button>
+      <div class="top-title" id="topTitle">Evolve</div>
+      <div class="top-actions">
+        <button id="webToggle" class="chip active" title="Pesquisa na internet"><span>◎</span> Web</button>
+        <button id="themeBtn" class="icon-btn" title="Alternar tema">◐</button>
+      </div>
+    </header>
+
+    <section id="chatView" class="view active">
+      <div id="messages" class="messages"></div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="hero-mark">E</div>
+        <h1>Como posso ajudar?</h1>
+        <p>Uma IA gratuita que roda no seu navegador, pesquisa fontes na internet e aprende com o uso.</p>
+        <div class="suggestions">
+          <button data-prompt="Pesquise as principais notícias de inteligência artificial de hoje e me explique o que realmente importa.">Notícias de IA hoje</button>
+          <button data-prompt="Me explique um assunto complexo de forma simples e depois aprofunde tecnicamente.">Aprender um assunto</button>
+          <button data-prompt="Analise esta ideia de negócio, encontre riscos e proponha um plano melhor.">Analisar uma ideia</button>
+          <button data-prompt="Pesquise fontes na internet sobre um tema atual e compare o que elas dizem.">Pesquisar com fontes</button>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div id="loadingBar" class="loading-bar hidden"><div id="loadingFill"></div><span id="loadingText">Preparando IA…</span></div>
+        <div class="composer">
+          <textarea id="promptInput" rows="1" placeholder="Pergunte qualquer coisa"></textarea>
+          <div class="composer-bottom">
+            <div class="composer-meta"><span id="webIndicator">◎ Pesquisa web ativa</span></div>
+            <button id="sendBtn" class="send-btn" aria-label="Enviar">↑</button>
+          </div>
+        </div>
+        <div class="fineprint">Evolve pode cometer erros. Verifique informações importantes e consulte as fontes.</div>
+      </div>
+    </section>
+
+    <section id="memoryView" class="view panel-view">
+      <div class="panel-shell">
+        <div class="panel-heading"><div><h2>Memória</h2><p>Informações e padrões que a Evolve mantém entre conversas neste navegador.</p></div><button id="exportStateBtn" class="secondary-btn">Exportar</button></div>
+        <div class="metrics" id="memoryMetrics"></div>
+        <div id="memoryList" class="cards-list"></div>
+      </div>
+    </section>
+
+    <section id="evolutionView" class="view panel-view">
+      <div class="panel-shell">
+        <div class="panel-heading"><div><h2>Evolução</h2><p>A IA analisa interações, feedback e lacunas para criar regras melhores de comportamento.</p></div><button id="evolveBtn" class="primary-btn">Evoluir agora</button></div>
+        <div class="evolution-callout"><b>Autodesenvolvimento controlado</b><span>Ela pode criar memórias e princípios comportamentais automaticamente. Nesta versão, não reescreve o próprio código executável.</span></div>
+        <div id="rulesList" class="cards-list"></div>
+        <h3 class="subheading">Histórico de ciclos</h3>
+        <div id="evolutionLog" class="cards-list"></div>
+      </div>
+    </section>
+
+    <section id="settingsView" class="view panel-view">
+      <div class="panel-shell narrow">
+        <div class="panel-heading"><div><h2>Configurações</h2><p>Escolha o cérebro, pesquisa e nível de autonomia.</p></div></div>
+        <div class="settings-card">
+          <label>Modelo no navegador<select id="modelSelect"></select></label>
+          <p class="help">O modelo é baixado uma vez e fica no cache do navegador. Modelos maiores costumam responder melhor, mas exigem mais memória de vídeo.</p>
+          <button id="loadModelBtn" class="primary-btn">Carregar modelo</button>
+        </div>
+        <div class="settings-card">
+          <label class="switch-row"><span><b>Pesquisar na internet</b><small>Busca fontes antes de responder.</small></span><input id="webSetting" type="checkbox" checked></label>
+          <label class="switch-row"><span><b>Autoevolução</b><small>Analisa conversas periodicamente e cria novos princípios.</small></span><input id="evolveSetting" type="checkbox" checked></label>
+          <label>Executar evolução a cada<select id="evolveEvery"><option value="3">3 perguntas</option><option value="4">4 perguntas</option><option value="6">6 perguntas</option><option value="10">10 perguntas</option></select></label>
+        </div>
+        <div class="settings-card danger-zone">
+          <b>Dados locais</b><p class="help">Conversa, memória e evolução ficam salvas apenas neste navegador.</p>
+          <div class="row"><button id="importStateBtn" class="secondary-btn">Importar estado</button><input id="importStateFile" type="file" accept="application/json" hidden><button id="resetBtn" class="danger-btn">Apagar tudo</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
